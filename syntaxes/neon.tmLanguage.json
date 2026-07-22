@@ -252,12 +252,13 @@
           }
         },
         {
-          "comment": "opaque record / internal protocol, and the plain forms. begin/end for the same reason `fn` is: it opens a scope in which `[T]` is unambiguously type parameters. It ends at the body brace, the `=` of a type alias, a `;`, or end of line.",
-          "begin": "\\b(?:(internal|opaque)\\s+)?(record|newtype|type|protocol|marker)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+          "comment": "The type declarations, with the record modifiers. `record_decl` in parser/mod.rs reads `sealed? opaque? record` in exactly that order, and the modifiers belong to `record` alone; `internal` is NOT here because the parser accepts it only on `mod` (see mod_decl), which the #declarations mod rule already handles. begin/end for the same reason `fn` is: it opens a scope in which `[T]` is unambiguously type parameters. It ends at the body brace, the `=` of a type alias, a `;`, or end of line.",
+          "begin": "\\b(?:(sealed)\\s+)?(?:(opaque)\\s+)?(record|newtype|type|protocol|marker)\\s+([A-Za-z_][A-Za-z0-9_]*)",
           "beginCaptures": {
             "1": { "name": "storage.modifier.neon" },
-            "2": { "name": "keyword.declaration.type.neon" },
-            "3": { "name": "entity.name.type.neon" }
+            "2": { "name": "storage.modifier.neon" },
+            "3": { "name": "keyword.declaration.type.neon" },
+            "4": { "name": "entity.name.type.neon" }
           },
           "end": "(?=[{=;])|$",
           "patterns": [
@@ -342,25 +343,35 @@
       "patterns": [
         {
           "name": "keyword.declaration.neon",
-          "match": "\\b(fn|let|record|opaque|newtype|type|mu|protocol|marker|impl|where|use|mod|internal|const)\\b"
+          "match": "\\b(fn|let|record|opaque|sealed|newtype|type|mu|protocol|marker|impl|where|use|mod|internal|const)\\b"
         },
         {
           "name": "keyword.control.neon",
           "match": "\\b(if|else|match|loop|while|for|in|break|continue|return)\\b"
         },
         {
+          "comment": "The try triad: `try e`, `try? e`, `try! e` — `try_forms` in parser/mod.rs, where a `?` or `!` token straight after `try` selects Soften or Assert. Matched as one unit so the suffix reads as part of the keyword rather than falling through to keyword.operator.other. The `\\b` sits between `try` and the suffix, so `tryx` is untouched.",
+          "name": "keyword.control.exception.neon",
+          "match": "\\btry\\b[?!]?"
+        },
+        {
           "comment": "`orelse` is deliberately NOT here. It reads like exception control flow but compiler/src/ops.rs makes it a binary operator — `BinOpInfo { op: BinOp::Orelse, prec: 1, text: \"orelse\" }`, the lowest rung of the one precedence ladder the parser and formatter share. It is scoped with the other word operators below, which is where the tree-sitter grammar puts it too.",
           "name": "keyword.control.exception.neon",
-          "match": "\\b(throws|throw|try|catch)\\b"
+          "match": "\\b(throws|throw|catch)\\b"
         },
         {
           "name": "keyword.other.test.neon",
           "match": "\\b(test|bench|assert|assert_eq|assert_ne|assert_throws)\\b"
         },
         {
-          "comment": "Operators that are words, per the table in compiler/src/ops.rs. `and` binds tighter than `or`; `orelse` is the lowest rung of all, below `or`.",
+          "comment": "The cast triad: `as T`, `as? T`, `as! T` — the postfix `as_op` in parser/mod.rs, distinguished exactly as try/try?/try! is, by a `?` or `!` token straight after `as`. One unit, same scope as the other word operators. The `\\b` between `as` and the suffix keeps the `as` of `assert` out.",
           "name": "keyword.operator.word.neon",
-          "match": "\\b(orelse|and|or|band|bor|bxor|bnot|bsl|bsr|is|as)\\b"
+          "match": "\\bas\\b[?!]?"
+        },
+        {
+          "comment": "Operators that are words, per the table in compiler/src/ops.rs (`as` is handled by the cast-triad rule above). `and` binds tighter than `or`; `orelse` is the lowest rung of all, below `or`.",
+          "name": "keyword.operator.word.neon",
+          "match": "\\b(orelse|and|or|band|bor|bxor|bnot|bsl|bsr|is)\\b"
         },
         {
           "comment": "`enum` is deliberately not a keyword — sum types are unions of records — but the parser reports a dedicated diagnostic when it is used as a declaration, so flag it.",
