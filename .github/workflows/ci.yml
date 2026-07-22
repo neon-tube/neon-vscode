@@ -1,0 +1,36 @@
+name: CI
+
+# Package the extension on every push to main and every pull request — the gate is that it
+# still builds into a valid .vsix. Plain JavaScript (main is client/extension.js), no
+# compile step and no lockfile, so `npm install` rather than `npm ci`. The one runtime
+# dependency (vscode-languageclient) is bundled into the .vsix by vsce.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Package extension
+        run: |
+          set -eux
+          npm install
+          npx --yes @vscode/vsce package -o neon-lang.vsix
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: neon-vscode-extension
+          path: neon-lang.vsix

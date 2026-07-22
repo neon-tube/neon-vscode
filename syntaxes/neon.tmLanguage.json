@@ -18,7 +18,7 @@
     "the `/` operator never swallows the `//` that opens a line comment.",
     "",
     "WHAT THIS FILE STRUCTURALLY CANNOT DO, and what does it instead:",
-    "extra/tree-sitter-neon has a real parser, so its highlights.scm answers all of the",
+    "neon-tube/tree-sitter-neon has a real parser, so its highlights.scm answers all of the",
     "following from the tree. A regular expression cannot, at any level of effort:",
     "",
     "  * Tell a type from a value. `entity.name.type` here is the `[A-Z]` convention and",

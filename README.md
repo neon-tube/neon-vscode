@@ -84,11 +84,11 @@ working without a publisher account.
 1. Fetch the one runtime dependency:
 
    ```
-   cd extra/vscode
+   cd neon-vscode
    npm install
    ```
 
-2. Open `extra/vscode` as a folder in VS Code — the extension root must be the
+2. Open `neon-vscode` as a folder in VS Code — the extension root must be the
    folder, not the repo.
 3. Press <kbd>F5</kbd>, or run the **Run Neon Extension** launch configuration.
    A second VS Code window (the Extension Development Host) opens with the
@@ -109,7 +109,7 @@ Package it with [`vsce`](https://github.com/microsoft/vscode-vsce) and install
 the result:
 
 ```
-cd extra/vscode
+cd neon-vscode
 npx @vscode/vsce package
 code --install-extension neon-lang-0.1.0.vsix
 ```
@@ -232,7 +232,7 @@ derived from `compiler/src/lexer/mod.rs`:
 ### What the grammar cannot do
 
 This is a regular expression pretending to be a parser, and
-[`extra/tree-sitter-neon`](../tree-sitter-neon) is an actual one. The gap is
+[`neon-tube/tree-sitter-neon`](https://github.com/neon-tube/tree-sitter-neon) is an actual one. The gap is
 listed in full in `information_for_contributors` at the top of
 `syntaxes/neon.tmLanguage.json`; the short version is that no amount of regex
 effort will let this file tell a type from a value, a record literal from a

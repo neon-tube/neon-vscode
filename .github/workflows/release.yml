@@ -1,0 +1,56 @@
+name: Release
+
+# Manual. Packages the .vsix, attaches it to a tagged GitHub Release, and — if a
+# marketplace token is configured — publishes it. The GitHub Release always happens; the
+# marketplace steps are skipped when their secret is absent, so the workflow is usable
+# before any publisher account exists.
+#
+#   VSCE_PAT  — VS Code Marketplace personal access token (publisher: neon-lang)
+#   OVSX_PAT  — Open VSX token (optional)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag, e.g. v0.1.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Package extension
+        run: |
+          set -eux
+          npm install
+          npx --yes @vscode/vsce package -o neon-lang.vsix
+
+      - name: Publish to GitHub Release ${{ inputs.tag }}
+        run: |
+          set -eux
+          gh release view "${{ inputs.tag }}" >/dev/null 2>&1 \
+            || gh release create "${{ inputs.tag }}" --title "${{ inputs.tag }}" --notes "neon-vscode ${{ inputs.tag }}"
+          gh release upload "${{ inputs.tag }}" neon-lang.vsix --clobber
+
+      - name: Publish to VS Code Marketplace
+        if: ${{ secrets.VSCE_PAT != '' }}
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: npx --yes @vscode/vsce publish --packagePath neon-lang.vsix
+
+      - name: Publish to Open VSX
+        if: ${{ secrets.OVSX_PAT != '' }}
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: npx --yes ovsx publish neon-lang.vsix -p "$OVSX_PAT"
