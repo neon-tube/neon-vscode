@@ -89,8 +89,8 @@
     "annotations": {
       "patterns": [
         {
-          "comment": "The six annotations the compiler recognises: `lookup()` in compiler/src/expand.rs is the complete registry. `inline` was added after this file was written and is the reason to check lookup() rather than trusting this comment. Any argument that follows is left to the ordinary string and punctuation rules.",
-          "match": "(@)(native|cfg|doc|runtime|pure|inline)\\b",
+          "comment": "The annotations the compiler recognises: the processor registry in compiler/src/expand.rs (`processor()`) plus the derives is the complete set. Check it rather than trusting this list; `derive` and `allow` were added after an earlier version of this comment. Any argument that follows is left to the ordinary string and punctuation rules.",
+          "match": "(@)(native|cfg|doc|runtime|pure|inline|derive|allow)\\b",
           "captures": {
             "1": { "name": "punctuation.definition.annotation.neon" },
             "2": { "name": "storage.modifier.annotation.neon" }
@@ -343,7 +343,7 @@
       "patterns": [
         {
           "name": "keyword.declaration.neon",
-          "match": "\\b(fn|let|record|opaque|sealed|newtype|type|mu|protocol|marker|impl|where|use|mod|internal|const)\\b"
+          "match": "\\b(fn|let|record|opaque|sealed|newtype|type|mu|protocol|marker|impl|where|use|mod|internal|const|move)\\b"
         },
         {
           "name": "keyword.control.neon",
